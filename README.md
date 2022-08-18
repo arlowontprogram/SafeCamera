@@ -19,6 +19,12 @@ local Part = workspace.Part
 PlayerCameraModule:ChangeCamera(Part)
 ```
 
+#### Set Camera Offset
+```lua
+local Offset = CFrame.new(0, 4, 0) * CFrame.Angles(0, math.rad(180), 0)
+PlayerCameraModule:SetCFrameOffset(Offset)
+```
+
 #### Return to Player
 ```lua
 PlayerCameraModule:Close()
