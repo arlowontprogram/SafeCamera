@@ -1,8 +1,8 @@
 -- @ metadata
--- @ title: PlayerCameraController
+-- @ title: SafeCamera
 -- @ creator: 110029109
 -- @ github: https://github.com/arlowontprogram/SafeCamera
--- @ version: 1.0
+-- @ version: 1.1
 
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -24,6 +24,13 @@ function PlayerCameraModule:SetCamera(Camera)
 	self.Camera = Camera
 end
 
+function PlayerCameraModule:SetCFrameOffset(Offset)
+	if not Offset then
+		warn("No offset defined")
+	end
+	self.Offset = Offset or CFrame.new(0, 0, 0)
+end
+
 function PlayerCameraModule:Close()
 	if self.Heartbeat ~= nil then
 		self.Heartbeat:Disconnect()
@@ -35,7 +42,7 @@ function PlayerCameraModule:Close()
 	self.Camera.CameraSubject = self.CameraSubject
 end
 
-function PlayerCameraModule:ChangeCamera(Basepart: BasePart): boolean
+function PlayerCameraModule:ChangePart(Basepart: BasePart): boolean
 	-- checks
 	if not Basepart then
 		warn("Object", Basepart, "not defined.")
@@ -44,6 +51,10 @@ function PlayerCameraModule:ChangeCamera(Basepart: BasePart): boolean
 	if not Basepart:IsA("BasePart") then
 		warn("Object", Basepart, "is not a BasePart")
 		return false
+	end
+	-- check if offset exists
+	if not self.Offset then
+		self.Offset = CFrame.new(0, 0, 0)
 	end
 	-- save subject
 	self.CameraSubject = self.Camera.CameraSubject
@@ -54,7 +65,7 @@ function PlayerCameraModule:ChangeCamera(Basepart: BasePart): boolean
 	-- listen for part removal
 	-- we cant listen to Destroying since ancestry changes to nil won't call Destroying
 	--self.Destroying = Basepart.Destroying:Connect(function()
-	
+
 	self.Destroying = Basepart.AncestryChanged:Connect(function()
 		if not Basepart:IsDescendantOf(game) then
 			self:Close()
@@ -62,7 +73,7 @@ function PlayerCameraModule:ChangeCamera(Basepart: BasePart): boolean
 	end)
 	-- create new heartbeat instance
 	self.Heartbeat = RunService.Heartbeat:Connect(function()
-		UpdateCam(self.Camera, Basepart)
+		UpdateCam(self.Camera, Basepart, self.Offset)
 	end)
 end
 
